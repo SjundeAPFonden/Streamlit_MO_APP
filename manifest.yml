@@ -1,0 +1,18 @@
+manifest_version: 1
+
+artifacts:
+  Streamlit_MO_APP: ./streamlit_app
+
+application:
+  name: streamlit_mo_app
+  title: Streamlit MO App
+  entrypoint: ./streamlit_app/app.py
+  readme: ./README.md  # <-- this is what the warning is about
+
+packages:
+  - streamlit
+  - pandas
+  - plotly
+  - snowflake-snowpark-python
+
+
