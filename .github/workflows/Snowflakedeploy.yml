@@ -1,0 +1,51 @@
+name: Deploy Python Module to Snowflake
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-zip-to-snowflake:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Snowflake CLI
+        run: |
+          python -m pip install --upgrade pip
+          pip install snowflake-cli-labs
+
+      - name: Zip Python module
+        run: |
+          cd streamlit_app
+          zip -r functions.zip utils/
+
+      - name: Upload zip to Snowflake stage using SSO
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
+          SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+          STAGE_NAME: ${{ secrets.SNOWFLAKE_STAGE }}
+        run: |
+          snow configure set account $SNOWFLAKE_ACCOUNT
+          snow configure set username $SNOWFLAKE_USER
+          snow configure set authenticator externalbrowser
+          snow configure set role $SNOWFLAKE_ROLE
+          snow configure set warehouse $SNOWFLAKE_WAREHOUSE
+          snow configure set database $SNOWFLAKE_DATABASE
+          snow configure set schema $SNOWFLAKE_SCHEMA
+
+          snow login
+
+          snow sql -q "PUT file://streamlit_app/functions.zip @$STAGE_NAME OVERWRITE = TRUE;"
