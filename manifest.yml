@@ -1,18 +1,23 @@
 manifest_version: 1
 
 artifacts:
-  Streamlit_MO_APP: ./streamlit_app
+  app_code: streamlit_app/
+  readme: README.md
 
 application:
   name: streamlit_mo_app
   title: Streamlit MO App
-  entrypoint: ./streamlit_app/app.py
-  readme: ./README.md  # <-- this is what the warning is about
+  description: A Snowflake Native App with Streamlit frontend
+  version: 1.0.0
+  readme: readme
+  entrypoint: app_code/app.py
 
-packages:
+resources:
+  streamlit:
+    entrypoint: app_code/app.py
+
+dependencies:
   - streamlit
   - pandas
   - plotly
   - snowflake-snowpark-python
-
-
